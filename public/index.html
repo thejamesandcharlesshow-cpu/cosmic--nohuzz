@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Web Proxy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a4d 50%, #0d1b3d 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            color: #e0e6ff;
+        }
+
+        .stars-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .constellation {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 1px solid rgba(100, 200, 255, 0.2);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(100, 200, 255, 0.05), transparent);
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 95%;
+            height: 100vh;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #64c8ff, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #64c8ff;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .tab {
+            padding: 10px 18px;
+            background: rgba(30, 30, 60, 0.6);
+            border: 1px solid rgba(100, 200, 255, 0.3);
+            color: #64c8ff;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab:hover {
+            background: rgba(40, 40, 80, 0.8);
+            border-color: rgba(100, 200, 255, 0.6);
+            box-shadow: 0 0 15px rgba(100, 200, 255, 0.2);
+        }
+
+        .tab.active {
+            background: rgba(100, 200, 255, 0.2);
+            border-color: rgba(100, 200, 255, 0.8);
+            box-shadow: 0 0 20px rgba(100, 200, 255, 0.4);
+        }
+
+        .tab-close {
+            cursor: pointer;
+            opacity: 0.6;
+            font-weight: bold;
+        }
+
+        .tab-close:hover {
+            opacity: 1;
+        }
+
+        .add-tab {
+            padding: 10px 15px;
+            background: rgba(167, 139, 250, 0.2);
+            border: 1px dashed rgba(167, 139, 250, 0.5);
+            color: #a78bfa;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1.2em;
+            transition: all 0.3s;
+        }
+
+        .add-tab:hover {
+            background: rgba(167, 139, 250, 0.3);
+            border-color: rgba(167, 139, 250, 0.8);
+        }
+
+        .content-wrapper {
+            flex: 1;
+            background: rgba(15, 23, 50, 0.7);
+            border: 1px solid rgba(100, 200, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 8px 32px rgba(100, 200, 255, 0.1);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .url-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: rgba(30, 30, 60, 0.5);
+            border: 1px solid rgba(100, 200, 255, 0.3);
+            border-radius: 8px;
+            color: #e0e6ff;
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: rgba(100, 200, 255, 0.8);
+            box-shadow: 0 0 15px rgba(100, 200, 255, 0.3);
+            background: rgba(30, 30, 60, 0.7);
+        }
+
+        .url-input::placeholder {
+            color: rgba(224, 230, 255, 0.4);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #64c8ff, #a78bfa);
+            color: #0a0e27;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(100, 200, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(100, 200, 255, 0.5);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .proxy-frame {
+            flex: 1;
+            border: 1px solid rgba(100, 200, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(20, 20, 40, 0.5);
+            min-height: 400px;
+            display: none;
+        }
+
+        .proxy-frame.active {
+            display: block;
+        }
+
+        .proxy-frame iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .empty-state {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            color: rgba(224, 230, 255, 0.6);
+            text-align: center;
+        }
+
+        .empty-state h2 {
+            font-size: 1.8em;
+            background: linear-gradient(135deg, #64c8ff, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .info-text {
+            text-align: center;
+            font-size: 0.85em;
+            color: rgba(224, 230, 255, 0.5);
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars-bg" id="starsBg"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>✨ Cosmic Proxy</h1>
+            <p>Navigate the cosmic web</p>
+        </div>
+
+        <div class="tabs-container" id="tabsContainer">
+            <div class="tab active" data-tab="0">
+                <span>🌟 New Tab</span>
+                <span class="tab-close" onclick="closeTab(0)">×</span>
+            </div>
+            <button class="add-tab" onclick="addTab()">+</button>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="url-input-group">
+                <input 
+                    type="text" 
+                    class="url-input" 
+                    id="urlInput" 
+                    placeholder="Enter URL (e.g., https://example.com)"
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button class="btn" onclick="loadProxy()">Navigate</button>
+            </div>
+
+            <div class="proxy-frame active" data-tab="0">
+                <div class="empty-state">
+                    <h2>🌌 Welcome to Cosmic Proxy</h2>
+                    <p>Enter a URL above and click Navigate to explore the cosmic web</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-text">
+            Made with ✨ across the stars
+        </div>
+    </div>
+
+    <script>
+        let tabs = [{ id: 0, url: '' }];
+        let currentTabId = 0;
+        let nextTabId = 1;
+
+        function generateStars() {
+            const bg = document.getElementById('starsBg');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                bg.appendChild(star);
+            }
+
+            for (let i = 0; i < 8; i++) {
+                const const_el = document.createElement('div');
+                const_el.className = 'constellation';
+                const_el.style.left = Math.random() * 90 + '%';
+                const_el.style.top = Math.random() * 90 + '%';
+                bg.appendChild(const_el);
+            }
+        }
+
+        function addTab() {
+            const tabId = nextTabId++;
+            tabs.push({ id: tabId, url: '' });
+            renderTabs();
+            switchTab(tabId);
+        }
+
+        function closeTab(tabId) {
+            tabs = tabs.filter(t => t.id !== tabId);
+            if (currentTabId === tabId) {
+                currentTabId = tabs[0]?.id || 0;
+            }
+            if (tabs.length === 0) {
+                tabs.push({ id: nextTabId++, url: '' });
+            }
+            renderTabs();
+        }
+
+        function switchTab(tabId) {
+            currentTabId = tabId;
+            renderTabs();
+            updateInputAndFrame();
+        }
+
+        function renderTabs() {
+            const container = document.getElementById('tabsContainer');
+            container.innerHTML = '';
+
+            tabs.forEach(tab => {
+                const tabEl = document.createElement('div');
+                tabEl.className = `tab ${tab.id === currentTabId ? 'active' : ''}`;
+                tabEl.onclick = () => switchTab(tab.id);
+                tabEl.innerHTML = `
+                    <span>🌟 ${tab.url || 'New Tab'}</span>
+                    <span class="tab-close" onclick="event.stopPropagation(); closeTab(${tab.id})">×</span>
+                `;
+                container.appendChild(tabEl);
+            });
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'add-tab';
+            addBtn.textContent = '+';
+            addBtn.onclick = addTab;
+            container.appendChild(addBtn);
+        }
+
+        function updateInputAndFrame() {
+            const currentTab = tabs.find(t => t.id === currentTabId);
+            document.getElementById('urlInput').value = currentTab?.url || '';
+
+            document.querySelectorAll('.proxy-frame').forEach(frame => {
+                frame.classList.remove('active');
+            });
+
+            const activeFrame = document.querySelector(`[data-tab="${currentTabId}"]`);
+            if (activeFrame) {
+                activeFrame.classList.add('active');
+            } else {
+                const newFrame = document.createElement('div');
+                newFrame.className = 'proxy-frame active';
+                newFrame.setAttribute('data-tab', currentTabId);
+                newFrame.innerHTML = '<div class="empty-state"><h2>🌌 Welcome to Cosmic Proxy</h2><p>Enter a URL above and click Navigate to explore the cosmic web</p></div>';
+                document.querySelector('.content-wrapper').appendChild(newFrame);
+            }
+        }
+
+        function loadProxy() {
+            let url = document.getElementById('urlInput').value.trim();
+            if (!url) return;
+
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+
+            const currentTab = tabs.find(t => t.id === currentTabId);
+            if (currentTab) {
+                currentTab.url = new URL(url).hostname;
+            }
+
+            renderTabs();
+
+            const frame = document.querySelector(`[data-tab="${currentTabId}"]`);
+            frame.innerHTML = '<div class="empty-state"><h2>⏳ Loading...</h2></div>';
+
+            const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
+            
+            fetch(proxyUrl)
+                .then(res => res.text())
+                .then(html => {
+                    const blob = new Blob([html], { type: 'text/html' });
+                    const blobUrl = URL.createObjectURL(blob);
+                    frame.innerHTML = `<iframe src="${blobUrl}"></iframe>`;
+                })
+                .catch(err => {
+                    frame.innerHTML = `<div class="empty-state"><h2>❌ Error</h2><p>${err.message}</p></div>`;
+                });
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                loadProxy();
+            }
+        }
+
+        generateStars();
+        renderTabs();
+    </script>
+</body>
+</html>
